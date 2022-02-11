@@ -1,9 +1,10 @@
-import { ref } from 'vue';
-const useApi = ({ url, fireOnLoad, successCallback = () => { }, failedCallback = () => { } }) => {
-    const pending = ref(true);
+import { onMounted, ref } from 'vue';
+const useApi = ({ url, fireOnLoad = false, successCallback = () => { }, failedCallback = () => { } }) => {
+    const pending = ref(false);
     const hasError = ref(false);
     const data = ref([]);
     const request = async () => {
+        pending.value = true;
         try {
             const res = await fetch(url);
             if (!res.ok) {
@@ -19,9 +20,11 @@ const useApi = ({ url, fireOnLoad, successCallback = () => { }, failedCallback =
         }
     };
 
-    if (!fireOnLoad) request();
+    onMounted(() => {
+        if (fireOnLoad) request()
+    })
 
-    return { pending, hasError, data, request, fireOnLoad };
+    return { pending, hasError, data, request };
 }
 
 export default useApi;
